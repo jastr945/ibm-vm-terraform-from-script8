@@ -5,12 +5,23 @@ terraform {
       source  = "IBM-Cloud/ibm"
       version = ">= 1.12.0"
     }
+    aap = {
+      source  = "redhat/aap"
+      version = ">= 1.0.0"
+    }
   }
 }
 
 provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key
   region            = "us-south"
+}
+
+provider "aap" {
+  host     = var.aap_host
+  username = var.aap_username
+  password = var.aap_password
+  insecure = true  # Set to false in prod
 }
 
 resource "ibm_is_instance" "vuln_vm" {
@@ -49,4 +60,19 @@ resource "ibm_is_public_gateway" "vuln_gw" {
   name = "vuln-gw"
   vpc  = ibm_is_vpc.vuln_vpc.id
   zone = "us-south-1"
+}
+
+### Ansible AAP
+data "aap_job_template" "configure_vm" {
+  name = "Configure IBM VM"
+}
+
+resource "aap_job_template_launch" "configure_vm" {
+  job_template_id = data.aap_job_template.configure_vm.id
+
+  extra_vars = jsonencode({
+    target_ip = ibm_is_instance.vuln_vm.primary_network_interface[0].primary_ip.address
+  })
+
+  depends_on = [ibm_is_instance.vuln_vm]
 }
