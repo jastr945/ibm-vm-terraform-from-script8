@@ -6,7 +6,7 @@ terraform {
       version = ">= 1.12.0"
     }
     aap = {
-      source  = "redhat/aap"
+      source  = "ansible/aap"
       version = ">= 1.0.0"
     }
   }
@@ -21,7 +21,6 @@ provider "aap" {
   host     = var.aap_host
   username = var.aap_username
   password = var.aap_password
-  insecure = true  # Set to false in prod
 }
 
 resource "ibm_is_instance" "vuln_vm" {
