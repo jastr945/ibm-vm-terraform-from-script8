@@ -62,16 +62,35 @@ resource "ibm_is_public_gateway" "vuln_gw" {
 }
 
 ### Ansible AAP
-data "aap_job_template" "configure_vm" {
-  name = "Configure IBM VM"
+resource "aap_inventory" "my_inventory" {
+  name         = "Project Pinecone inventory"
+  description  = "A new Project Pinecone inventory for testing"
+  organization = 1
+  variables = jsonencode(
+    {
+      "foo" : "bar"
+    }
+  )
 }
 
-resource "aap_job_template_launch" "configure_vm" {
-  job_template_id = data.aap_job_template.configure_vm.id
+resource "aap_group" "my_group" {
+  inventory_id = aap_inventory.my_inventory.id
+  name         = "tf_group"
+  variables = jsonencode(
+    {
+      "foo" : "bar"
+    }
+  )
+}
 
-  extra_vars = jsonencode({
-    target_ip = ibm_is_instance.vuln_vm.primary_network_interface[0].primary_ip.address
-  })
+data "aap_job_template" "configure_vm" {
+  name = "Configure IBM VM"
+  organization_name = "hashicorp"
+}
 
-  depends_on = [ibm_is_instance.vuln_vm]
+resource "aap_job" "my_job" {
+  inventory_id    = aap_inventory.my_inventory.id
+  job_template_id = aap_job_template.configure_vm.id
+
+  depends_on = [ibm_is_instance.vuln_vm, aap_group.my_group]
 }
