@@ -64,6 +64,8 @@ resource "ibm_is_public_gateway" "vuln_gw" {
 ### Ansible AAP
 data "aap_inventory" "my_inventory" {
   name         = "Demo Inventory"
+  id = 1
+  organization_name = "Default"
 }
 
 resource "aap_group" "my_group" {
