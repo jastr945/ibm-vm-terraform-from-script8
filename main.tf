@@ -84,7 +84,7 @@ data "aap_job_template" "configure_vm" {
 }
 
 resource "aap_job" "my_job" {
-  inventory_id    = aap_inventory.my_inventory.id
+  inventory_id    = data.aap_inventory.my_inventory.id
   job_template_id = data.aap_job_template.configure_vm.id
 
   depends_on = [ibm_is_instance.vuln_vm, aap_group.my_group]
